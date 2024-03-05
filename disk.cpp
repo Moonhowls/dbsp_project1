@@ -1,12 +1,12 @@
-# include <iostream>
-# include <cmath>
-# include <malloc.h>
-# include <tuple>
+#include <iostream>
+#include <cmath>
+#include <malloc.h>
+#include <tuple>
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <vector>
-# include "disk.h"
+#include "disk.h"
 
 using namespace std;
 
