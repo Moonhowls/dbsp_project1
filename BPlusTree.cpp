@@ -42,7 +42,7 @@ searchResult BPlusTree::searchTargetKey(uint targetKey) {
     return returnTuple;
 }
 
-Node* BPlusTree::insertTargetKey(vector<Node*> ancestryTree, Record targetRecord, uchar* blockAddress, int offset, bool isDuplicate) {
+Node* BPlusTree::insertTargetKey(vector<Node*> ancestryTree, Record targetRecord, uchar* blockAddress, int offset, bool isDuplicate, int paramN) {
     Node* targetNode = ancestryTree[0];
     uint targetKey = targetRecord.numVotes;
     string targetId = targetRecord.tconst;
@@ -74,7 +74,41 @@ Node* BPlusTree::insertTargetKey(vector<Node*> ancestryTree, Record targetRecord
     newKeyPtrPair.key = targetKey;
     newKeyPtrPair.ptr = (void*) newKeyVectorPtr;
 
-    // 3: Insert KeyPtrPair into leaf node
-    
+    // 3: Insert KeyPtrPair into leaf node by calling insertKeyPtrPairToLeafNode()
+
 
 }
+
+updateParentTuple BPlusTree::insertKeyPtrPairToLeafNode(Node* targetLeafNode, Node::KeyPtrPair targetKeyPtrPair, int paramN) {
+    bool updateParent;
+    uint targetKey = 0;
+    void* leftPtr = nullptr;
+    void* rightPtr = nullptr;
+
+    // 1: Extracting the KeyPtrPair array from the leafNode
+    int initialSize = targetLeafNode -> numOfKeys;
+    Node::KeyPtrPair keyPtrPairArray[initialSize + 1];
+    copy(targetLeafNode -> keyPointerPairs, targetLeafNode -> keyPointerPairs + initialSize, keyPtrPairArray);
+    // alternative manual copy method
+    // for (int i = 0; i < targetLeafNode -> numOfKeys; i++) {
+    //     keyPtrPairArray[i] = targetLeafNode ->keyPointerPairs[i];
+    // }
+
+    // 2: Append the new KeyPtrPair to the extracted array
+    keyPtrPairArray[initialSize] = targetKeyPtrPair; // right? don't need initialSize + 1 since index starts at 0
+
+    // 3: Sort the extracted array by calling std::sort()
+    sort(keyPtrPairArray, keyPtrPairArray + initialSize); // right? don't need initialSize + 1 since keyPtrPairArray is pointer to index 0 element
+
+    // 4: Check number of elements in sorted array
+    if ((initialSize + 1) > paramN) {
+        // Node is full, needs to be split
+        // split the node by calling splitLeafNode() (this is yet to be declared)
+    } else {
+        copy(keyPtrPairArray[0], keyPtrPairArray[initialSize], targetLeafNode -> keyPointerPairs);
+        updateParent = false;
+        updateParentTuple returnTuple = make_tuple(updateParent, targetKey, leftPtr, rightPtr);
+        return returnTuple;
+    }
+}
+

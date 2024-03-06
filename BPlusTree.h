@@ -12,6 +12,7 @@ typedef tuple<vector<Node*>, bool> searchResult;
 typedef unsigned int uint;
 typedef unsigned char uchar;
 typedef vector<tuple<string, uchar*, int>> keyVector;
+typedef tuple<bool, uint, void*, void*> updateParentTuple;
 
 class BPlusTree {
 
@@ -23,7 +24,8 @@ class BPlusTree {
 
         // methods
         searchResult searchTargetKey(uint targetKey);
-        Node* insertTargetKey(vector<Node*> ancestryTree, Record targetRecord, uchar* blockAddress, int offset, bool isDuplicate);
+        Node* insertTargetKey(vector<Node*> ancestryTree, Record targetRecord, uchar* blockAddress, int offset, bool isDuplicate, int paramN);
+        updateParentTuple insertKeyPtrPairToLeafNode(Node* targetLeafNode, Node::KeyPtrPair targetKeyPtrPair, int paramN);
         vector<Node*> searchKeyRange(uint lowerBound, uint upperBound);
         bool deleteTargetKey(vector<Node*> ancestryTree, uint targetKey);
 };
