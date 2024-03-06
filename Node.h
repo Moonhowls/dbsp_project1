@@ -8,7 +8,7 @@ class Node {
     private:
         struct KeyPtrPair {
             void* ptr = nullptr;
-            unsigned int key = 0; // should this be 0...?
+            unsigned int key = 0; // Justification in report, TODO: Insert section
 
             // not sure if a constructor is necessary here
             // KeyPtrPair() {}
@@ -16,7 +16,7 @@ class Node {
 
         bool isLeafNode;
         unsigned int numOfKeys;
-        KeyPtrPair keyPointerPairs[5]; // 5 is just a placeholder, assuming we're hardcoding this?
+        KeyPtrPair keyPointerPairs[23]; // Look at report for calculation: n = 23, TODO: find section of report to enter here
         Node* lastPointer;
 
     public:
