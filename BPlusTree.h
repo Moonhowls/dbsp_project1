@@ -14,8 +14,8 @@ typedef unsigned int uint;
 class BPlusTree {
 
     public:
-        Node* rootNode = &Node(true, 0);
-        unsigned int numNodes = 1;
+        Node* rootNode;
+        unsigned int numNodes;
 
         BPlusTree();
 
