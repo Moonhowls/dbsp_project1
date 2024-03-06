@@ -7,6 +7,7 @@ class Node {
 
     public:
         struct KeyPtrPair {
+            // double check whether initialization in structs is done like this or not
             void* ptr = nullptr;
             unsigned int key = 0; // Justification in report, TODO: Insert section
 
