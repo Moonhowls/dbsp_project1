@@ -65,4 +65,16 @@ Node* BPlusTree::insertTargetKey(vector<Node*> ancestryTree, Record targetRecord
         return targetNode;
     }
 
+    // 2: Create vector and KeyPtrPair for target key
+    tuple keyVectorTuple = make_tuple(targetId, blockAddress, offset);
+    keyVector newKeyVector = keyVector(1, keyVectorTuple);
+    keyVector* newKeyVectorPtr = &newKeyVector;
+
+    Node::KeyPtrPair newKeyPtrPair;
+    newKeyPtrPair.key = targetKey;
+    newKeyPtrPair.ptr = (void*) newKeyVectorPtr;
+
+    // 3: Insert KeyPtrPair into leaf node
+    
+
 }
