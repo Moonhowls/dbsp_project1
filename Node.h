@@ -5,7 +5,7 @@ using namespace std;
 
 class Node {
 
-    private:
+    public:
         struct KeyPtrPair {
             void* ptr = nullptr;
             unsigned int key = 0; // Justification in report, TODO: Insert section
@@ -20,7 +20,7 @@ class Node {
         Node* lastPointer;
 
     public:
-        Node(bool isLeafNode, unsigned int numOfKeys, KeyPtrPair keyPointerPairs, Node* lastPointer);
+        Node(bool isLeafNode, unsigned int numOfKeys);
 
         // declare any methods below if need be
 };
