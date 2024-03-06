@@ -1,6 +1,5 @@
 #include <iostream>
 #include <cmath>
-#include <malloc.h>
 #include <tuple>
 #include <fstream>
 #include <sstream>
