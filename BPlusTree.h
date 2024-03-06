@@ -10,6 +10,8 @@ using namespace std;
 
 typedef tuple<vector<Node*>, bool> searchResult;
 typedef unsigned int uint;
+typedef unsigned char uchar;
+typedef vector<tuple<string, uchar*, int>> keyVector;
 
 class BPlusTree {
 
@@ -21,7 +23,7 @@ class BPlusTree {
 
         // methods
         searchResult searchTargetKey(uint targetKey);
-        Node* insertTargetKey(vector<Node*> ancestryTree, Record targetRecord);
+        Node* insertTargetKey(vector<Node*> ancestryTree, Record targetRecord, uchar* blockAddress, int offset, bool isDuplicate);
         vector<Node*> searchKeyRange(uint lowerBound, uint upperBound);
         bool deleteTargetKey(vector<Node*> ancestryTree, uint targetKey);
 };

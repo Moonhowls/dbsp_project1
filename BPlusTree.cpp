@@ -41,3 +41,28 @@ searchResult BPlusTree::searchTargetKey(uint targetKey) {
     searchResult returnTuple = make_tuple(searchPath, keyExists);
     return returnTuple;
 }
+
+Node* BPlusTree::insertTargetKey(vector<Node*> ancestryTree, Record targetRecord, uchar* blockAddress, int offset, bool isDuplicate) {
+    Node* targetNode = ancestryTree[0];
+    uint targetKey = targetRecord.numVotes;
+    string targetId = targetRecord.tconst;
+
+    // 1: Handle duplicate, update key vector
+    if (isDuplicate) {
+        keyVector* targetVectorPtr;
+        for (int i = 0; i < targetNode -> numOfKeys; i++) {
+            if (targetKey == targetNode -> keyPointerPairs[i].key) {
+                targetVectorPtr = (keyVector*) targetNode -> keyPointerPairs[i].ptr;
+                for (int j = 0; j < size(*targetVectorPtr); j++) {
+                    if (targetId == get<0>((*targetVectorPtr)[j])) {
+                        return targetNode;
+                    }
+                }
+            }
+        }
+
+        (*targetVectorPtr).push_back(make_tuple(targetId, blockAddress, offset));
+        return targetNode;
+    }
+
+}
