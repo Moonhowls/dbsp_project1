@@ -13,6 +13,11 @@ class Node {
 
             // not sure if a constructor is necessary here
             // KeyPtrPair() {}
+
+            // Comparison operator for sorting operation
+            bool operator<(const KeyPtrPair& other) const {
+                return key < other.key;
+            }
         };
 
         bool isLeafNode;
