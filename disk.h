@@ -11,18 +11,18 @@ using namespace std;
 typedef unsigned int uint;
 typedef unsigned char uchar;
 
-class KeyPtrPair{
-public:
-    uint key_value;
-    vector <string, uchar*> vector_ptr;
-};
+// class KeyPtrPair{
+// public:
+//     uint key_value;
+//     vector <string, uchar*> vector_ptr;
+// };
 
-class Node{
-public:
-    bool is_leaf;
-    KeyPtrPair* key_ptr_pairs; //array of key-pointer pairs
-    Node* last_ptr; //leaf: pointer to next leaf node, internal: pointer to last child node
-};
+// class Node{
+// public:
+//     bool is_leaf;
+//     KeyPtrPair* key_ptr_pairs; //array of key-pointer pairs
+//     Node* last_ptr; //leaf: pointer to next leaf node, internal: pointer to last child node
+// };
 
 class Record{
 public:
