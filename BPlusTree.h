@@ -30,13 +30,7 @@ class BPlusTree {
         void remove(int key); // Function to delete a key and its corresponding record from the B+ tree
 
         // Helper functions for insertion and deletion
-        void insertIntoNode(BPlusTreeNode* node, int key, Record* record);
-        void splitNode(BPlusTreeNode* node);
-        BPlusTreeNode* findLeafNode(int key);
-        void deleteFromNode(BPlusTreeNode* node, int key);
         void mergeNodes(BPlusTreeNode* left, BPlusTreeNode* right);
-
-        // More helpers
         void insertRecursive(BPlusTreeNode* node, int key, Record* record);
         void insertIntoLeaf(BPlusTreeNode* node, int key, Record* record);
         void insertIntoParent(BPlusTreeNode* left, int key, BPlusTreeNode* right);
