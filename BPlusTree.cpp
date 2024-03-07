@@ -367,5 +367,41 @@ void BPlusTree::mergeNodes(BPlusTreeNode* left, BPlusTreeNode* right) {
 }
 
 void redistributeKeys(BPlusTreeNode* left, BPlusTreeNode* right) {
-    // TODO: implement logic to redistribute keys between nodes
+    // find parent node
+    BPlusTreeNode* parentNode = left -> parent;
+
+    // find index of right node in parent node
+    int index = 0;
+    while (index < parentNode -> children.size() && parentNode -> children[index] != right) {
+        ++index;
+    }
+
+    // redistribute keys between left and right nodes
+    if (left -> keys.size() < right -> keys.size()) {
+        // redistribute from right to left since right has more keys
+        int redistributionIndex = right -> keys.size() / 2;
+        left -> keys.push_back(parentNode -> keys[index - 1]);
+        parentNode -> keys[index - 1] = right -> keys[redistributionIndex];
+        left -> keys.insert(left -> keys.end(), right -> keys.begin(), right -> keys.begin() + redistributionIndex);
+        right -> keys.erase(right -> keys.begin(), right -> keys.begin() + redistributionIndex);
+
+        // check if nodes are internal nodes, because then they require children pointers to be redistributed too
+        if (!left -> isLeafNode) {
+            left -> children.insert(left -> children.end(), right -> children.begin(), right -> children.begin() + redistributionIndex + 1);
+            right -> children.erase(right -> children.begin(), right -> children.begin() + redistributionIndex + 1);
+        }
+    } else {
+        // redistribute keys from left to right since left has more keys
+        int redistributionIndex = left -> keys.size() / 2;
+        right -> keys.insert(right -> keys.begin(), parentNode -> keys[index - 1]);
+        parentNode -> keys[index - 1] = left -> keys[redistributionIndex - 1];
+        right -> keys.insert(right -> keys.begin(), left -> keys.begin() + redistributionIndex - 1, left -> keys.end());
+        left -> keys.erase(left -> keys.begin() + redistributionIndex - 1, left -> keys.end());
+
+        // check if nodes are internal nodes, because then they require children pointers' redistribution as well
+        if (!left -> isLeafNode) {
+            right -> children.insert(right -> children.begin(), left -> children.begin() + redistributionIndex, left -> children.end());
+            left -> children.erase(left -> children.begin() + redistributionIndex, left -> children.end());
+        }
+    }
 }
