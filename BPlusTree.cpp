@@ -339,7 +339,31 @@ BPlusTreeNode* findSiblingNode(BPlusTreeNode* node) {
 }
 
 void BPlusTree::mergeNodes(BPlusTreeNode* left, BPlusTreeNode* right) {
-    // TODO: implement logic to merge nodes
+    // find the parent node
+    BPlusTreeNode* parentNode = left -> parent;
+
+    // find index of right node in the parent node
+    int index = 0;
+    while (index < parentNode -> children.size() && parentNode -> children[index] != right) {
+        ++index;
+    }
+
+    // shift the keys and the children from the right node to the left node
+    left -> keys.push_back(parentNode -> keys[index - 1]);
+    left -> keys.insert(left -> keys.end(), right -> keys.begin(), right -> keys.end());
+    left -> children.insert(left -> children.end(), right -> children.begin(), right -> children.end());
+
+    // update parent nodes keys and children after the shift
+    parentNode -> keys.erase(parentNode -> keys.begin() + index - 1);
+    parentNode -> children.erase(parentNode -> children.begin() + index);
+
+    // update right node children's parent pointer post shift
+    for (auto child : right -> children) {
+        child -> parent = left;
+    }
+
+    // delete right node
+    delete right;
 }
 
 void redistributeKeys(BPlusTreeNode* left, BPlusTreeNode* right) {
