@@ -250,3 +250,98 @@ void BPlusTree::splitInternalNode(BPlusTreeNode* node) {
     int midKey = node -> keys[mid];
     insertIntoParent(node, midKey, newInternalNode);
 }
+
+void BPlusTree::remove(int key) {
+    // call recursive fn to delete key
+    removeRecursive(root, key);
+}
+
+void removeRecursive(BPlusTreeNode* node, int key) {
+    if (node == nullptr) {
+        return;
+    }
+
+    // find position of key in node
+    int index = 0;
+    while (index < node -> numKeys && key > node -> keys[index]) {
+        ++index;
+    }
+
+    if (index < node -> numKeys && key == node -> keys[index]) {
+        // key found in this node
+        if (node -> isLeafNode) {
+            // key was found in a leaf node
+            // delete the key and the record from the leaf node
+            node -> keys.erase(node -> keys.begin() + index);
+            node -> recordLists.erase(node -> recordLists.begin() + index);
+            --node -> numKeys;
+        } else {
+            // key was found in an internal node
+            // replace the key w predecessor/successor key from a leaf node
+            BPlusTreeNode* leftChildNode = node -> children[index];
+            BPlusTreeNode* rightChildNode = node -> children[index + 1];
+
+            // find predecessor key from left child node
+            while (!leftChildNode -> isLeafNode) {
+                leftChildNode = leftChildNode -> children.back();
+            }
+            int precedecessorKey = leftChildNode -> keys.back();
+
+            // find the successor key from the right child node
+            while (!rightChildNode -> isLeafNode) {
+                rightChildNode = rightChildNode -> children.front();
+            }
+            int successorKey = rightChildNode -> keys.front();
+
+            // choose between the predecessor and successor keys to replace the deleted key
+            int replacementKey;
+            if (node -> keys.size() - index <= index) {
+                replacementKey = precedecessorKey;
+            } else {
+                replacementKey = successorKey;
+            }
+
+            // replace the key in the internal node
+            node -> keys[index] = replacementKey;
+
+            // recursively delete the key from the leaf node
+            removeRecursive((replacementKey == precedecessorKey) ? leftChildNode : rightChildNode, replacementKey);
+        }
+    } else {
+        // key not found in this node, need to continue searching in appropriate child node
+        removeRecursive(node -> children[index], key);
+    }
+}
+
+BPlusTreeNode* findSiblingNode(BPlusTreeNode* node) {
+    if (node -> parent == nullptr) {
+        return nullptr; // rootNode has no sibling
+    }
+
+    BPlusTreeNode* parentNode = node -> parent;
+    
+    int index = 0;
+    while (index < parentNode -> children.size() && parentNode -> children[index] != node) {
+        ++index;
+    }
+
+    // check if node has left sibling
+    if (index > 0) {
+        return parentNode -> children[index - 1];
+    }
+
+    // check if node has right sibling
+    if (index < parentNode -> children.size() - 1) {
+        return parentNode -> children[index + 1];
+    }
+
+    return nullptr; // the case of node having no siblings
+}
+
+void BPlusTree::mergeNodes(BPlusTreeNode* left, BPlusTreeNode* right) {
+    // TODO: implement logic to merge nodes
+}
+
+void redistributeKeys(BPlusTreeNode* left, BPlusTreeNode* right) {
+    // TODO: implement logic to redistribute keys between nodes
+}
