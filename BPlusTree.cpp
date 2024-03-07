@@ -56,7 +56,7 @@ Record* BPlusTree::search(int key) {
  * @param key 
  * @return Record* 
  */
-Record* searchRecursive(BPlusTreeNode* node, int key) {
+Record* BPlusTree::searchRecursive(BPlusTreeNode* node, int key) {
     if (node == nullptr) {
         return nullptr;
     }
@@ -178,7 +178,7 @@ void BPlusTree::splitLeafNode(BPlusTreeNode* node) {
     }
 }
 
-BPlusTreeNode* createLeafNode() {
+BPlusTreeNode* BPlusTree::createLeafNode() {
     BPlusTreeNode* newLeafNode = new BPlusTreeNode;
 
     newLeafNode -> isLeafNode = true;
@@ -187,7 +187,7 @@ BPlusTreeNode* createLeafNode() {
     return newLeafNode;
 }
 
-BPlusTreeNode* createInternalNode() {
+BPlusTreeNode* BPlusTree::createInternalNode() {
     BPlusTreeNode* newInternalNode = new BPlusTreeNode;
 
     newInternalNode -> isLeafNode = false;
@@ -256,7 +256,7 @@ void BPlusTree::remove(int key) {
     removeRecursive(root, key);
 }
 
-void removeRecursive(BPlusTreeNode* node, int key) {
+void BPlusTree::removeRecursive(BPlusTreeNode* node, int key) {
     if (node == nullptr) {
         return;
     }
@@ -417,7 +417,7 @@ void BPlusTree::printEntireBPlusTree() {
     cout << endl;
 }
 
-void printBPlusTree(BPlusTreeNode* treeRoot) {
+void BPlusTree::printBPlusTree(BPlusTreeNode* treeRoot) {
     if (treeRoot == nullptr) {
         return;
     }

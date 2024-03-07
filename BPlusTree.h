@@ -37,6 +37,11 @@ class BPlusTree {
         void splitLeafNode(BPlusTreeNode* node);
         void splitInternalNode(BPlusTreeNode* node);
         void printEntireBPlusTree();
+        Record* searchRecursive(BPlusTreeNode* node, int key);
+        BPlusTreeNode* createLeafNode();
+        BPlusTreeNode* createInternalNode();
+        void removeRecursive(BPlusTreeNode* node, int key);
+        void printBPlusTree(BPlusTreeNode* treeRoot);
 };
 
 #endif /* BPLUSTREE_H */
