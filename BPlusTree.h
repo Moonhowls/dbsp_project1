@@ -35,6 +35,13 @@ class BPlusTree {
         BPlusTreeNode* findLeafNode(int key);
         void deleteFromNode(BPlusTreeNode* node, int key);
         void mergeNodes(BPlusTreeNode* left, BPlusTreeNode* right);
+
+        // More helpers
+        void insertRecursive(BPlusTreeNode* node, int key, Record* record);
+        void insertIntoLeaf(BPlusTreeNode* node, int key, Record* record);
+        void insertIntoParent(BPlusTreeNode* left, int key, BPlusTreeNode* right);
+        void splitLeafNode(BPlusTreeNode* node);
+        void splitInternalNode(BPlusTreeNode* node);
 };
 
 #endif /* BPLUSTREE_H */
