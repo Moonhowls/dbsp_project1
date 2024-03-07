@@ -25,7 +25,7 @@ BPlusTree::~BPlusTree() {
  * 
  * @param node 
  */
-void destroyTree(BPlusTreeNode* node) {
+void BPlusTree::destroyTree(BPlusTreeNode* node) {
     if (node == nullptr) {
         return;
     }
