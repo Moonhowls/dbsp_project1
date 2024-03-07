@@ -26,6 +26,7 @@ class BPlusTree {
         ~BPlusTree(); // destructor
 
         Record* search(int key); // Function to search for a key in the B+ tree
+        void insert(int key, Record* record); // Function to insert a key and its corresponding record into the B+ tree
         void remove(int key); // Function to delete a key and its corresponding record from the B+ tree
 
         // Helper functions for insertion and deletion
