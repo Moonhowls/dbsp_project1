@@ -405,3 +405,40 @@ void redistributeKeys(BPlusTreeNode* left, BPlusTreeNode* right) {
         }
     }
 }
+
+void BPlusTree::printEntireBPlusTree() {
+    if (this == nullptr || this -> root == nullptr) {
+        cout << "B+ Tree is empty" << endl;
+        return;
+    }
+
+    cout << "B+ Tree: ";
+    printBPlusTree(this -> root);
+    cout << endl;
+}
+
+void printBPlusTree(BPlusTreeNode* treeRoot) {
+    if (treeRoot == nullptr) {
+        return;
+    }
+
+    if (treeRoot -> isLeafNode) {
+        // print keys and values of leaf node
+        for (int i = 0; i < treeRoot -> numKeys; ++i) {
+            cout << treeRoot -> keys[i] << ": ";
+            for (int j = 0; j < treeRoot -> recordLists[i].size(); ++j) {
+                Record* recordToPrint = treeRoot -> recordLists[i][j];
+                cout << "(" << recordToPrint -> tconst << ", " << recordToPrint -> averageRating << ", " << recordToPrint -> numVotes << ") ";
+            }
+            cout << " | ";
+        }
+    } else {
+        // recursively print child nodes
+        for (int i = 0; i < treeRoot -> numKeys; ++i) {
+            printBPlusTree(treeRoot -> children[i]);
+            cout << treeRoot -> keys[i] << " ";
+        }
+
+        printBPlusTree(treeRoot -> children[treeRoot -> numKeys]);
+    }
+}

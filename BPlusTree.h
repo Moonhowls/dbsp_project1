@@ -36,6 +36,7 @@ class BPlusTree {
         void insertIntoParent(BPlusTreeNode* left, int key, BPlusTreeNode* right);
         void splitLeafNode(BPlusTreeNode* node);
         void splitInternalNode(BPlusTreeNode* node);
+        void printEntireBPlusTree();
 };
 
 #endif /* BPLUSTREE_H */
