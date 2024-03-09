@@ -53,6 +53,36 @@ class BPlusTree {
         void printBPlusTree(BPlusTreeNode* treeRoot);
         void destroyTree(BPlusTreeNode* node);
         void print_root_node();
+
+        // Functions for deletion from B+ tree
+
+        // 1. Main deletion function
+        void remove(uint key);
+
+        // 2. To search for the deleted key in the parent, so dont have to call a for loop everytime
+        tuple<BPlusTreeNode*, bool> search_to_delete(uint key);
+        tuple<int, bool> search_key_in_node(BPlusTreeNode* target_node, uint key);
+
+        // 3. When a deleted key is found in the tree as an index, it is deleted and replaced by the smallest value of its right sub-tree
+        uint find_smallest_right_subtree(BPlusTreeNode* right_ptr);
+
+        // 4. Finds the left and right siblings of a target_node, returns nullptr if there isn't any
+        tuple<BPlusTreeNode*, BPlusTreeNode*>findSiblings(BPlusTreeNode* target_node);
+
+        // 5. Checks whether the leaf node is balanced, call this after the deletion has been handled
+        bool leaf_is_balanced(BPlusTreeNode* leaf_node);
+
+        // 6. Checks whether the internal node is balanced, call this after the deletion has been handled
+        bool internal_is_balanced(BPlusTreeNode* internal_node);
+
+        // 7. The borrower_node borrows a key to a borrowing_node, different behaviours for leaf nodes and internal nodes-
+        bool borrowSiblings(BPlusTreeNode* borrowing_node);
+
+        // 8. Has different behaviours for leaf nodes and internal nodes
+        void mergeNodes(BPlusTreeNode* left, BPlusTreeNode* right);
+
+        // 9. Handle the removal of the deleted key by working its way up from a node to a root
+        void remove_deleted_keys(BPlusTreeNode* target_node, uint key);
 };
 
 #endif /* BPLUSTREE_H */

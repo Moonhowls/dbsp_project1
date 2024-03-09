@@ -676,6 +676,330 @@ void BPlusTree::splitInternalNode(BPlusTreeNode* node, uint key) {
     insertIntoParent(node, midKey, newInternalNode);
 }
 
+// Remove/Delete a key from the BPlusTree
+void BPlusTree::remove(uint key){
+
+    // 1. Search for the key, if it doesn't exist, just print not found and leave
+    BPlusTreeNode* target_node;
+    bool in_index;
+
+    tie(target_node, in_index) = search_to_delete(key);
+
+    if (!(in_index)){
+        cout << "Record not found! " << endl;
+        return;
+    }
+    
+    cout << "Deleting key " << endl;
+
+    // Start a recursion loop - the exit points are from points 3 to 6, 7 will update target_node to its parent
+    while (target_node != root){
+        // 2. Remove the entry in the node
+        int pos;
+        bool key_found;
+        int key_array_size = sizeof(target_node->keys)/sizeof(target_node->keys[0]);
+
+        tie(pos, key_found) = search_key_in_node(target_node, key);
+
+        vector<uint> key_vector = arrayToVector(target_node->keys, target_node->numKeys);
+
+        // if found, then delete everything related to the key
+        if (key_found){
+            target_node -> numKeys--;
+            target_node -> recordLists.erase(target_node -> recordLists.begin() + pos);
+
+            // Keys need to be shifted forwards
+            key_vector.erase(key_vector.begin() + pos);
+            vectorToArray(key_vector, target_node->keys, key_array_size);
+        }
+
+        vector<uint>().swap(key_vector);
+
+        // 3. Check if the leaf node has underflowed (basically doesn't meet the min. key requirement)
+        // If it is found to be balanced even after deletion, then update the parent node
+        if (leaf_is_balanced(target_node)){
+            remove_deleted_keys(target_node, key);
+            return;
+        }
+
+        // 4. Then, check if it is possible to borrow keys from sibling nodes, if yes, do so and return.
+        if (borrowSiblings(target_node)){
+            remove_deleted_keys(target_node, key);
+            return;
+        }
+
+        // 5. Else, merge with sibling node - if merge is done, then we need to update the parent and continue running the loop
+        BPlusTreeNode* parent = target_node -> parent;
+        int nodeIndex;
+            for (int i = 0; i < parent -> numKeys; i++) {
+                if (parent -> children[i] == target_node) {
+                    nodeIndex = i;
+                }
+            }
+    
+        // find leftSibling and check whether it exists
+        BPlusTreeNode* leftSibling = parent -> children[nodeIndex - 1];
+        BPlusTreeNode* rightSibling = parent -> children[nodeIndex + 1];
+        if (leftSibling != nullptr){
+            mergeNodes(leftSibling, target_node);
+        }
+        else{
+            mergeNodes(target_node, rightSibling);
+        }
+
+        // 6. Update parent node - after every merge, need to update the target_node
+        target_node = target_node -> parent;
+    }
+
+    // 3. If it is root, collapse root and return, this scenario occurs when the children of the root node merge, leaving only one child
+    if (target_node == root){
+        if (target_node -> numKeys < minKeys){
+            root = target_node -> children[0];
+        }
+    }
+
+}
+
+// Remove all instances of a key from the index and also updates them to their smallest right subtree
+void BPlusTree::remove_deleted_keys(BPlusTreeNode* target_node, uint key){
+
+    BPlusTreeNode* cursor = target_node;
+    int pos;
+    bool key_found;
+
+    // Keep visiting each parent until you reach the root, deleting every same key that remains in the index
+    while(cursor != root){
+        tie(pos, key_found) = search_key_in_node(cursor, key);
+        if (key_found){
+            uint replacement_key = find_smallest_right_subtree(cursor -> children[pos + 1]);
+            cursor -> keys[pos] = replacement_key;
+        }
+        cursor = cursor -> parent;
+    }
+
+    // When it reaches root, do one last time
+    tie(pos, key_found) = search_key_in_node(cursor, key);
+    if (key_found){
+        uint replacement_key = find_smallest_right_subtree(cursor -> children[pos + 1]);
+        cursor -> keys[pos] = replacement_key;
+    }
+
+}
+
+void BPlusTree::mergeNodes(BPlusTreeNode* left, BPlusTreeNode* right) {
+    // transfer everything from right node to the left node
+    // transfer keys
+    int leftStartIndex = left -> numKeys - 1;
+    for (int i = 0; i < right -> numKeys; i++) {
+        left -> keys[leftStartIndex + i] = right -> keys[i];
+    }
+    if (left -> isLeafNode && right -> isLeafNode) {
+        // transfer recordLists
+        left -> recordLists.insert(left -> recordLists.begin() + leftStartIndex, right -> recordLists.begin(), right -> recordLists.end());
+    } else {
+        // transfer children
+        for (int i = 0; i < 24; i++) {
+            left -> children[leftStartIndex + i] = right -> children[i];
+        }
+    }
+    // update numKeys for left
+    left -> numKeys += right -> numKeys;
+    
+    // handle parent
+    BPlusTreeNode* parentNode = right -> parent;
+    // delete pointer to right
+    for (BPlusTreeNode* child : parentNode -> children) {
+        if (child == right) {
+            child = nullptr;
+        }
+    }
+    
+    // handle parent indices... im stuck here
+    // get all indices of 
+    // delete the index between the left and right nodes
+    uint key = right -> keys[0];
+    int pos;
+    bool is_exists;
+    tie(pos, is_exists) = search_key_in_node(parentNode, key);
+
+    parentNode -> numKeys--;
+    parentNode -> recordLists.erase(parentNode -> recordLists.begin() + pos);
+
+    int key_array_size = sizeof(parentNode -> keys)/sizeof(parentNode -> keys[0]);
+
+    // Keys need to be shifted forwards
+    vector<uint> key_vector = arrayToVector(parentNode -> keys, parentNode -> numKeys);
+    key_vector.erase(key_vector.begin() + pos);
+    vectorToArray(key_vector, parentNode->keys, key_array_size);
+    
+    // delete right node
+    delete right;
+}
+
+bool BPlusTree::borrowSiblings(BPlusTreeNode* node) {
+    BPlusTreeNode* parent = node -> parent;
+    
+    // iterate through parent to find index of this node
+    int nodeIndex;
+    for (int i = 0; i < parent -> numKeys; i++) {
+        if (parent -> children[i] == node) {
+            nodeIndex = i;
+        }
+    }
+    
+    // find leftSibling and check whether it exists
+    BPlusTreeNode* leftSibling = parent -> children[nodeIndex - 1];
+    if (leftSibling != nullptr) {
+        // check whether leftSibling can lend us a key
+        if (leftSibling -> numKeys > minKeys) {
+            // take the last key and corresponding recordList from leftSibling
+            int borrowIndex = leftSibling -> numKeys - 1;
+            int borrowedKey = leftSibling -> keys[borrowIndex];
+            vector<Record*> borrowedRecordList = leftSibling -> recordLists.back();
+            
+            // erase the last key and corresponding recordList from leftSibling
+            leftSibling -> keys[borrowIndex] = 0;
+            leftSibling -> recordLists.pop_back();
+            
+            // update leftSibling numKeys
+            leftSibling -> numKeys--;
+            
+            // insert the stuff into front of node
+            // make space at front of keys array
+            for (int i = node -> numKeys; i > 0; i--) {
+                node -> keys[i + 1] = node -> keys[i];
+            }
+            // insert borrowedKey and borrowedRecordList into node
+            node -> keys[0] = borrowedKey;
+            node -> recordLists.insert(node -> recordLists.begin(), borrowedRecordList);
+            
+            // update node numKeys
+            node -> numKeys++;
+            
+            // does anything have to be done for the parent?
+            // Should update parent
+
+            
+            //
+            return true;
+        }
+    }
+    
+    // find rightSibling and check whether it exists
+    BPlusTreeNode* rightSibling = parent -> children[nodeIndex + 1];
+    if (rightSibling != nullptr) {
+        // check whether rightSibling can ledn us a key
+        if (rightSibling -> numKeys > minKeys) {
+            // take the first key and corresponding recordList from rightSibling
+            int borrowedKey = rightSibling -> keys[0];
+            vector<Record*> borrowedRecordList = rightSibling -> recordLists.front();
+            
+            // erase the first key and corresponding recordList from rightSibling
+            for (int i = 0; i < rightSibling -> numKeys; i++) {
+                rightSibling -> keys[i] = rightSibling -> keys[i + 1];
+            }
+            rightSibling -> recordLists.erase(rightSibling -> recordLists.begin());
+            
+            // update rightSibling numKeys
+            rightSibling -> numKeys--;
+            
+            // inserts stuff into back of node
+            int insertIndex = node -> numKeys - 1;
+            node -> keys[insertIndex] = borrowedKey;
+            node -> recordLists.push_back(borrowedRecordList);
+            
+            // update node numKeys
+            node -> numKeys++;
+            
+            // does anything have to be done for the parent?
+            
+            //
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+tuple<BPlusTreeNode*, BPlusTreeNode*>findSiblings(BPlusTreeNode* target_node){
+    
+    // Go to parent of this node and search for the first key of the target node
+    BPlusTreeNode* parentNode = target_node -> parent;
+
+
+}
+
+// Searches for an index of a key within a node
+tuple<int, bool> BPlusTree::search_key_in_node(BPlusTreeNode* target_node, uint key){
+
+    for (int i = 0; i < target_node -> numKeys; i++){
+        if (key == target_node -> keys[i]){
+            return make_tuple(i, true);
+        }
+    }
+    return make_tuple(0, false);
+}
+
+// Given a key, find whether it exists in the BPlusTree, if it does, return the node pointer to that key
+tuple<BPlusTreeNode*, bool> BPlusTree::search_to_delete(uint key){
+
+    BPlusTreeNode* cursor = root;
+
+    while(!(cursor->isLeafNode)){
+        int index;
+        for (int i = 0; i < cursor -> numKeys; i++){
+            if (key < cursor -> keys[i]){
+                index = i;
+                break;
+            }
+            if (i == cursor -> numKeys - 1){
+                index = cursor -> numKeys;
+            }
+        }
+        cursor = cursor -> children[index];
+    }
+
+    for (int j = 0 ; j < cursor -> numKeys; j++){
+        if (key == cursor -> keys[j]){
+            return make_tuple(cursor, true);
+        }
+    }
+    return make_tuple(nullptr, false);
+}
+
+// Follow the right ptr, then follow all the first children until the leaf node
+uint BPlusTree::find_smallest_right_subtree(BPlusTreeNode* right_ptr){
+
+    BPlusTreeNode* cursor = root;
+
+    while(!(cursor->isLeafNode)){
+        cursor = cursor -> children[0];
+    }
+
+    return cursor -> keys[0];
+
+}
+
+// Given a leaf node, check whether it is balanced
+bool BPlusTree::leaf_is_balanced(BPlusTreeNode* leaf_node){
+
+    if (leaf_node -> numKeys < minKeys){
+        return false;
+    }
+    else{ return true;}
+    
+}
+
+// Given an internal node, check whether it is balanced
+bool BPlusTree::internal_is_balanced(BPlusTreeNode* internal_node){
+
+    if (internal_node -> numKeys < floor(order - 1 / 2)){
+        return false;
+    }
+    else{ return true;}
+
+}
+
 // void BPlusTree::remove(int key) {
 //     // call recursive fn to delete key
 //     removeRecursive(root, key);
