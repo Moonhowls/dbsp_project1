@@ -43,6 +43,7 @@ public:
     uint num_of_elements;
 
     BlockHeader(uint block_id, uint num_of_elements);
+    // BlockHeader();
 };
 
 class Disk {
@@ -64,6 +65,7 @@ public:
 //Methods
     //Constructor - constructs a Disk object
     Disk(uint Disk_size,uint Block_size);
+    // Disk();
 
     //Destructor - ensures that memory is deallocated
     ~Disk();
