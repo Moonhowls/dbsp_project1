@@ -39,6 +39,17 @@ Disk::~Disk(){
     disk_pointer = nullptr;
 }
 
+// Used to calculate the block address, block id and offset from the record pointer (block id starts from 0)
+tuple<uchar*, int, int> Disk::retrieve_block_from_record_ptr(Record* record_ptr){
+    uchar* record = (uchar*)record_ptr;
+    int block_position = (uchar*)record_ptr - disk_pointer;
+    int block_id = floor(block_position / block_size);
+    uchar* block_ptr = disk_pointer + (block_size * block_id);
+    int offset = (uchar*)record_ptr - block_ptr;
+    return make_tuple(block_ptr, block_id, offset);
+};
+
+
 // Check if block is in use
 bool Disk::is_block_in_use(uint block_num){
     if (block_num + 1 > blocks_in_use){
@@ -48,7 +59,7 @@ bool Disk::is_block_in_use(uint block_num){
     return true;
 };
 
-    // Returns the start address of the nth data block (start at block 0)
+// Returns the start address of the nth data block (start at block 0)
 tuple<uint, uint, vector <tuple<uchar*, int>>> Disk::read_nth_data_block(uint block_num){
 
         vector <Record> records;

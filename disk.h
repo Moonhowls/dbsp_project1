@@ -83,4 +83,6 @@ public:
     uchar* insert_record(Record record, uchar* record_pointer);
 
     tuple<uchar*, int> write_record_to_disk(Record target_record);
+
+    tuple<uchar*, int, int> retrieve_block_from_record_ptr(Record* record_ptr);
 };

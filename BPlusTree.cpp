@@ -1,4 +1,5 @@
 #include "BPlusTree.h"
+#include <queue>
 
 /**
  * @brief Construct a new BPlusTree::BPlusTree object
@@ -176,6 +177,69 @@ tuple<BPlusTreeNode*, bool> BPlusTree::search_key(uint key) {
     return make_tuple(node, false);
 }
 
+// Given a range of keys, find and return a vector of Record pointers and the number of index nodes accessed 
+tuple<vector<Record*>, int> BPlusTree::search_target_range(uint lower_bound, uint upper_bound) {
+
+    // Follow lower_bound until leaf node
+    vector<Record*> record_vector;
+    int index_nodes_accessed = 0;
+
+    if (root == nullptr) {
+        return make_tuple(record_vector, index_nodes_accessed);
+    }
+
+    BPlusTreeNode* node = root;
+
+    while (!(node -> isLeafNode)){
+        index_nodes_accessed++;
+        int index = 0;
+        for (int i = 0; i < node -> numKeys; i++){
+            if (lower_bound < node -> keys[i]){
+                // follow this pointer
+                index = i;
+                break;
+            }
+            if (i == node -> numKeys - 1){
+                index = node -> numKeys;
+            }
+        }
+        node = node->children[index];
+    }
+
+    BPlusTreeNode* leafNode = node; // To traverse the appropriate leaf nodes
+
+    int ptr_array_size = sizeof(leafNode -> children)/sizeof(leafNode -> children[0]);
+
+    while (leafNode != nullptr && upper_bound >= leafNode -> keys[0]) {
+        index_nodes_accessed++;
+        // Traverse leaf node
+        for (int i = 0; i < leafNode->numKeys; ++i) {
+            int key = leafNode->keys[i];
+            if (key >= lower_bound && key <= upper_bound) {
+                // Key falls within the range, print or store it
+                for (int j = 0; j < leafNode -> recordLists[i].size() ; j++){
+                    record_vector.push_back(leafNode -> recordLists[i][j]);
+                }
+            }
+        }
+        // Move to the next leaf node
+        leafNode = leafNode->children[ptr_array_size - 1];
+    }
+
+    return make_tuple(record_vector, index_nodes_accessed);
+
+    // if (leaf_node -> children[ptr_array_size - 1] != nullptr){
+    //     for (int i = 0; i < leaf_node -> numKeys; i++){
+    //         if (lower_bound >= leaf_node -> keys[i] && leaf_node -> keys[i] < upper_bound){
+    //             for (int j = 0; j < leaf_node -> recordLists[i].size() ; j++){
+    //                 record_vector.push_back(leaf_node -> recordLists[i][j]);
+    //             }
+    //         }
+    //     }
+    //     leaf_node = leaf_node -> children[ptr_array_size - 1];
+    // }
+}
+
 tuple<BPlusTreeNode*, bool> BPlusTree::searchRecursive(BPlusTreeNode* node, uint key) {
 
     if (root == nullptr) {
@@ -236,14 +300,11 @@ tuple<BPlusTreeNode*, bool> BPlusTree::searchRecursive(BPlusTreeNode* node, uint
  * @param record 
  */
 void BPlusTree::insert(uint key, Record* record) {
-    cout << "In insert" << endl;
 
     // Search for the key, if exists, that means a vector of record pointers already exists
     BPlusTreeNode* node_ptr;
     bool is_duplicate;
     tie(node_ptr, is_duplicate) = search_key(key);
-
-    cout << "In insert to vector" << endl;
 
     if (node_ptr -> numKeys == 0){
         // Insert and return
@@ -253,23 +314,14 @@ void BPlusTree::insert(uint key, Record* record) {
         return;
     }
 
-    // 168 ????
-    cout << true << endl;
-    cout << is_duplicate << endl;
-
     if (is_duplicate){ // Just push_back the recordsList[i] and return
-        cout << "Here" << endl;
         for (int i = 0; i < node_ptr -> numKeys; i++){
             if (key == node_ptr->keys[i]){
-                cout << "Assigning" << endl;
                 node_ptr -> recordLists[i].push_back(record);
-                cout << "Did I return? Yes" << endl;
                 return;
             }
         }
     }
-
-    cout << "starting insert process" << endl;
 
     // Call recursive fn to handle insertion of key and record
     insertRecursive(node_ptr, key, record);
@@ -283,7 +335,6 @@ void BPlusTree::insert(uint key, Record* record) {
  * @param record 
  */
 void BPlusTree::insertRecursive(BPlusTreeNode* node, uint key, Record* record) {
-    cout << "Inside insertRecursive" << endl;
     // check if node is a leaf node
     if (node -> isLeafNode) {
         // Call fn to insert key and record into leaf node
@@ -308,7 +359,6 @@ void BPlusTree::insertRecursive(BPlusTreeNode* node, uint key, Record* record) {
 }
 
 void BPlusTree::insertIntoLeaf(BPlusTreeNode* node, uint key, Record* record) {
-    cout << "Inserting into leaf" << endl;
 
     int key_array_size = sizeof(node->keys)/sizeof(node->keys[0]);
     int ptr_array_size = sizeof(node->children)/sizeof(node->children[0]);
@@ -346,13 +396,13 @@ void BPlusTree::insertIntoLeaf(BPlusTreeNode* node, uint key, Record* record) {
     node -> recordLists.insert(node -> recordLists.begin() + index, vector<Record*>{record});
 
     // It's wrong here, the order is off for record list
-    cout << "The record list of first node: " << endl;
-    for (int i = 0; i < node -> recordLists.size(); i++){
-        for (int j = 0; j < node-> recordLists[i].size(); j++){
-            Record* record_ptr = node -> recordLists[i][j];
-            cout << "Record " << record_ptr->tconst << ", numVotes: " << record_ptr->numVotes << endl;
-        }
-    }
+    // cout << "The record list of first node: " << endl;
+    // for (int i = 0; i < node -> recordLists.size(); i++){
+    //     for (int j = 0; j < node-> recordLists[i].size(); j++){
+    //         Record* record_ptr = node -> recordLists[i][j];
+    //         cout << "Record " << record_ptr->tconst << ", numVotes: " << record_ptr->numVotes << endl;
+    //     }
+    // }
 
     ++node -> numKeys;
 
@@ -367,8 +417,6 @@ void BPlusTree::insertIntoLeaf(BPlusTreeNode* node, uint key, Record* record) {
 void BPlusTree::splitLeafNode(BPlusTreeNode* node, uint key, Record* record) {
     // Create a new leaf node
     BPlusTreeNode* newLeafNode = createLeafNode();
-
-    cout << "In split leaf process " << endl;
 
     // Convert keys array to vector
     vector<uint> node_vector = arrayToVector(node->keys, node->numKeys);
@@ -411,13 +459,13 @@ void BPlusTree::splitLeafNode(BPlusTreeNode* node, uint key, Record* record) {
     newLeafNode -> recordLists.assign(node -> recordLists.begin() + mid, node -> recordLists.end());
     node -> recordLists.resize(mid);
 
-    cout << "The record list of second node: " << endl;
-    for (int i = 0; i < newLeafNode -> recordLists.size(); i++){
-        for (int j = 0; j < newLeafNode -> recordLists[i].size(); j++){
-            Record* record_ptr = newLeafNode -> recordLists[i][j];
-            cout << "Record " << record_ptr->tconst << ", numVotes: " << record_ptr->numVotes << endl;
-        }
-    }
+    // cout << "The record list of second node: " << endl;
+    // for (int i = 0; i < newLeafNode -> recordLists.size(); i++){
+    //     for (int j = 0; j < newLeafNode -> recordLists[i].size(); j++){
+    //         Record* record_ptr = newLeafNode -> recordLists[i][j];
+    //         cout << "Record " << record_ptr->tconst << ", numVotes: " << record_ptr->numVotes << endl;
+    //     }
+    // }
 
     newLeafNode -> numKeys = node -> numKeys - mid;
     node -> numKeys = mid;
@@ -466,7 +514,6 @@ void BPlusTree::splitLeafNode(BPlusTreeNode* node, uint key, Record* record) {
         root = newRootNode;
         node -> parent = newRootNode;
         newLeafNode -> parent = newRootNode;
-        cout << "After creating internal node" << endl;
     }
 
 
@@ -490,7 +537,6 @@ BPlusTreeNode* BPlusTree::createLeafNode() {
 }
 
 BPlusTreeNode* BPlusTree::createInternalNode() {
-    cout << "Creating Internal Node" << endl;
     BPlusTreeNode* newInternalNode = new BPlusTreeNode;
 
     newInternalNode -> isLeafNode = false;
@@ -500,7 +546,6 @@ BPlusTreeNode* BPlusTree::createInternalNode() {
 }
 
 void BPlusTree::insertIntoParent(BPlusTreeNode* left, uint key, BPlusTreeNode* right) {
-    cout << "In inserting into parent process" << endl;
     // check if parentNode requires splitting since its full
     int key_array_size = sizeof(left->keys)/sizeof(left->keys[0]);
     int ptr_array_size = sizeof(left->children)/sizeof(left->children[0]);
@@ -560,10 +605,8 @@ void BPlusTree::insertIntoParent(BPlusTreeNode* left, uint key, BPlusTreeNode* r
 
 void BPlusTree::splitInternalNode(BPlusTreeNode* node, uint key) {
     // create new internal node
-    cout << "Here1" << endl;
     BPlusTreeNode* newInternalNode = createInternalNode();
 
-    cout << "Here2" << endl;
     int key_array_size = sizeof(node->keys)/sizeof(node->keys[0]);
     int ptr_array_size = sizeof(node->children)/sizeof(node->children[0]);
 
@@ -599,28 +642,20 @@ void BPlusTree::splitInternalNode(BPlusTreeNode* node, uint key) {
     node_children.resize(mid + 1);
     vectorToArray(node_keys, node -> keys, key_array_size);
     ptrvectorToArray(node_children, node -> children, ptr_array_size);
-    
-    cout << "Here3" << endl;
 
     //newInternalNode -> keys.assign(node -> keys.begin() + mid + 1, node -> keys.end());
     // new_node_keys.assign(node_keys.begin() + mid + 1, node_keys.end());
     // vectorToArray(new_node_keys, newInternalNode -> keys, key_array_size);
 
-    cout << "Here4" << endl;
-
     //newInternalNode -> children.assign(node -> children.begin() + mid + 1, node -> children.end());
     // new_node_children.assign(node_children.begin() + mid + 1, node_children.end());
     // ptrvectorToArray(new_node_children, newInternalNode -> children, ptr_array_size);
-
-    cout << "Here5" << endl;
 
     // newInternalNode -> keys.shrink_to_fit();
     // newInternalNode -> children.shrink_to_fit();
     // newInternalNode -> recordLists.shrink_to_fit();
     newInternalNode -> numKeys = floor(node -> numKeys / 2);
     node -> numKeys = mid;
-
-    cout << "Here6" << endl;
 
     // update pointers
     newInternalNode -> parent = node -> parent;
@@ -637,8 +672,6 @@ void BPlusTree::splitInternalNode(BPlusTreeNode* node, uint key) {
     vector<BPlusTreeNode*>().swap(node_children);
     vector<uint>().swap(new_node_keys);
     vector<BPlusTreeNode*>().swap(new_node_children);
-
-    cout << "Here7" << endl;
 
     insertIntoParent(node, midKey, newInternalNode);
 }
@@ -892,8 +925,66 @@ void BPlusTree::printBPlusTree(BPlusTreeNode* treeRoot) {
 }
 
 void BPlusTree::print_root_node() {
+    cout << "Keys in the root node: " << endl;
     for (int i = 0; i < root->numKeys; i++){
-        cout << "Keys in the root node: " << endl;
         cout << root->keys[i] << endl; 
     }
 }
+
+// Function to count the number of nodes in the tree
+int BPlusTree::countNodes(BPlusTreeNode* root) {
+
+    int nodes = 0;
+    std::queue<BPlusTreeNode*> q;
+    q.push(root);
+
+    while (!q.empty()) {
+        BPlusTreeNode* current = q.front();
+        q.pop();
+        nodes++;
+
+        if (!current->isLeafNode) {
+            for (size_t i = 0; i <= current->numKeys; ++i) {
+                if (current->children[i] != nullptr)
+                    q.push(current->children[i]);
+            }
+        }
+    }
+
+    return nodes;
+}
+
+
+// Function to count the number of levels in the tree
+int BPlusTree::countLevels(BPlusTreeNode* root) {
+    
+    BPlusTreeNode* cursor = root;
+
+    uint key = 0;
+    int num_levels = 1;
+
+    while (!(cursor -> isLeafNode)){
+        cursor = cursor -> children[0];
+        num_levels++;
+    }
+
+    return num_levels;
+}
+
+void BPlusTree::print_number_of_nodes_and_levels(){
+
+    BPlusTreeNode* cursor = root;
+    int number_of_nodes = 1;
+    int number_of_levels = 1;
+
+    for (int i = 0; i < cursor -> numKeys + 1; i++){
+        if (cursor -> isLeafNode){
+
+        }
+        else{
+            number_of_levels++;
+        }
+
+    }
+
+};

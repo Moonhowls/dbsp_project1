@@ -17,7 +17,7 @@ struct BPlusTreeNode {
 };
 
 class BPlusTree {
-    private:
+    public:
         BPlusTreeNode* root; // Pointer to root node
         int order; // Order of the B+ tree
         int minKeys; // Min number of keys in a node
@@ -40,10 +40,15 @@ class BPlusTree {
         void splitLeafNode(BPlusTreeNode* node, uint key, Record* record);
         void splitInternalNode(BPlusTreeNode* node, uint key);
         void printEntireBPlusTree();
+        tuple<vector<Record*>, int> search_target_range(uint lower_bound, uint upper_bound);
         tuple<BPlusTreeNode*, bool> search_key(uint key);
         tuple<BPlusTreeNode*,bool> searchRecursive(BPlusTreeNode* node, uint key);
         BPlusTreeNode* createLeafNode();
         BPlusTreeNode* createInternalNode();
+        void print_number_of_nodes_and_levels();
+        int countNodes(BPlusTreeNode* root);
+        void printNodeAndLevelCount(BPlusTreeNode* root);
+        int countLevels(BPlusTreeNode* root);
         // void removeRecursive(BPlusTreeNode* node, int key);
         void printBPlusTree(BPlusTreeNode* treeRoot);
         void destroyTree(BPlusTreeNode* node);
