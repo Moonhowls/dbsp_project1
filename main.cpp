@@ -64,8 +64,6 @@ int main(){
         uchar* record_address;
         int record_offset;
         tie(record_address, record_offset) = memory_disk.write_record_to_disk(record);
-        // bptree.insert(record.numVotes, &record);
-        // cout << "Insertion complete" << endl;
     }
 
     // Read first block of data
@@ -139,158 +137,175 @@ int main(){
     // BPlusTreeNode* target_node;
     // bool is_duplicate;
 
-    // cout << endl << "--------------------------------------Experiment 3 Results-----------------------------------" << endl;
-    // cout << "Number of index nodes the process accesses: " << bptree.countLevels(bptree.root) << endl;
+    cout << endl << "--------------------------------------Experiment 3 Results-----------------------------------" << endl;
+    cout << "Number of index nodes the process accesses: " << bptree.countLevels(bptree.root) << endl;
 
-    // // Retrieval process
-    // auto t3 = high_resolution_clock::now();
+    // Retrieval process
+    auto t3 = high_resolution_clock::now();
 
-    // tie(target_node, is_duplicate) = bptree.search_key(500);
+    BPlusTreeNode* target_node;
+    bool is_duplicate;
 
-    // std::set<int>::iterator it;
-    // std::pair<std::set<int>::iterator,bool> ret;
-    // std::set<int> myset;
-    // uchar* block_address;
-    // int block_id, offset;
-    // float num_records = 1.0;
-    // float sum_averageRating = 0.0;
+    tie(target_node, is_duplicate) = bptree.search_key(500);
 
-    // for (int i = 0; i < target_node -> numKeys; i++){
-    //     if (target_node -> keys[i] == 500){
-    //         for (int j = 0; j < target_node -> recordLists[i].size(); j++){
-    //             Record* record_ptr = target_node->recordLists[i][j];
-    //             cout << "Record " << j + 1 << " >>> " << "tconst: " << record_ptr->tconst <<  ", NumVotes: " << record_ptr->numVotes << ", averageRating: " << record_ptr->averageRating << endl;
-    //             tie(block_address, block_id, offset) = memory_disk.retrieve_block_from_record_ptr(record_ptr);
-    //             ret = myset.insert(block_id);
-    //             sum_averageRating += record_ptr->averageRating;
-    //             num_records++;
-    //         }
-    //     }
-    // }
+    std::set<int>::iterator it;
+    std::pair<std::set<int>::iterator,bool> ret;
+    std::set<int> myset;
+    uchar* block_address;
+    int block_id, offset;
+    float num_records = 1.0;
+    float sum_averageRating = 0.0;
 
-    // int num_data_blocks_accessed = myset.size();
-    // int average_averageRating = (sum_averageRating / num_records);
+    for (int i = 0; i < target_node -> numKeys; i++){
+        if (target_node -> keys[i] == 500){
+            for (int j = 0; j < target_node -> recordLists[i].size(); j++){
+                Record* record_ptr = target_node->recordLists[i][j];
+                //cout << "Record " << j + 1 << " >>> " << "tconst: " << record_ptr->tconst <<  ", NumVotes: " << record_ptr->numVotes << ", averageRating: " << record_ptr->averageRating << endl;
+                tie(block_address, block_id, offset) = memory_disk.retrieve_block_from_record_ptr(record_ptr);
+                ret = myset.insert(block_id);
+                sum_averageRating += record_ptr->averageRating;
+                num_records++;
+            }
+        }
+    }
 
-    // auto t4 = high_resolution_clock::now();
-    // // cout << "Blocks accessed: " << endl;
-    // // for (int element : myset)
-    // // {
-    // //     std::cout << element << ' ';
-    // // }
-    // cout << "Number of data blocks the process accesses: " << num_data_blocks_accessed << endl;
-    // cout << "Average of averageRating of records returned:  " << average_averageRating << endl;
-    // cout << "Running time of retrieval process: " << endl;
-    // auto ms_2 = duration_cast<milliseconds>(t4 - t3);
-    // auto ms_double = duration_cast<milliseconds>(t4 - t3);
+    int num_data_blocks_accessed = myset.size();
+    float average_averageRating = (sum_averageRating / num_records);
 
-    // std::cout << ms_2.count() << "ms\n";
+    auto t4 = high_resolution_clock::now();
 
+    cout << "Number of data blocks the process accesses: " << num_data_blocks_accessed << endl;
+    cout.precision(2);
+    cout << "Average of averageRating of records returned:  " << average_averageRating << endl;
+    cout << "Running time of retrieval process: " << endl;
+    auto ms_2 = duration_cast<milliseconds>(t4 - t3);
+    //auto ms_double = duration_cast<milliseconds>(t4 - t3);
+    duration<double, std::milli> ms_double = t4 - t3;
 
-    // auto t5 = high_resolution_clock::now();
-    // int num_data_blocks = 0;
-
-    // for (int i = 0; i < memory_disk.blocks_in_use; i++){
-    //     uint block_id, num_of_elements;
-    //     vector <tuple<uchar*, int>> record_address;
-    //     num_data_blocks++;
-    //     tie(block_id, num_of_elements,record_address) = memory_disk.read_nth_data_block(i);
-    //     for (int j = 0; j < num_of_elements; j++){
-    //         Record* record_ptr = (Record*) (get<0>(record_address[j]) + get<1>(record_address[j]));
-    //         if (record_ptr -> numVotes == 500){
-    //             break; // record with numVotes == 500 found
-    //         }
-    //     }
-    // }
-
-    // auto t6 = high_resolution_clock::now();
-
-    // auto ms_3 = duration_cast<milliseconds>(t6 - t5);
-
-    // std::cout << "Number of data blocks accessed by brute-force linear scan: " << num_data_blocks << endl;
-    // std::cout << "Running time for brute-force linear scan: " << ms_3.count() << "ms\n";
+    std::cout << ms_double.count() << "ms\n";
 
 
-    // cout << "---------------------------------------------------------------------------------------------" << endl;
+    auto t5 = high_resolution_clock::now();
+    int num_data_blocks = 0;
 
-    // cout << "------------------------------Experiment 4 Results-------------------------------------------" << endl;
-    // int num_index_nodes_accessed;
-    // vector<Record*> record_vector;
+    for (int i = 0; i < memory_disk.blocks_in_use; i++){
+        uint block_id, num_of_elements;
+        vector <tuple<uchar*, int>> record_address;
+        num_data_blocks++;
+        tie(block_id, num_of_elements,record_address) = memory_disk.read_nth_data_block(i);
+        for (int j = 0; j < num_of_elements; j++){
+            Record* record_ptr = (Record*) (get<0>(record_address[j]) + get<1>(record_address[j]));
+            if (record_ptr -> numVotes == 500){
+                break; // record with numVotes == 500 found
+            }
+        }
+    }
 
-    // auto t7 = high_resolution_clock::now();
+    auto t6 = high_resolution_clock::now();
+
+    auto ms_3 = duration_cast<milliseconds>(t6 - t5);
+
+    std::cout << "Number of data blocks accessed by brute-force linear scan: " << num_data_blocks << endl;
+    std::cout << "Running time for brute-force linear scan: " << ms_3.count() << "ms\n";
+
+
+    cout << "---------------------------------------------------------------------------------------------" << endl;
+
+    cout << "------------------------------Experiment 4 Results-------------------------------------------" << endl;
+    int num_index_nodes_accessed;
+    vector<Record*> record_vector;
+
+    auto t7 = high_resolution_clock::now();
     
-    // // Retrieval process
-    // tie(record_vector, num_index_nodes_accessed) = bptree.search_target_range(30000, 40000);
+    // Retrieval process
+    tie(record_vector, num_index_nodes_accessed) = bptree.search_target_range(30000, 40000);
 
-    // num_records = 1.0;
-    // sum_averageRating = 0.0;
-    // myset.clear();
+    num_records = 1.0;
+    sum_averageRating = 0.0;
+    myset.clear();
 
-    // //cout << "Keys of records retrieved: " << endl;
+    //cout << "Keys of records retrieved: " << endl;
 
-    // for (int i = 0; i < record_vector.size(); i++){
-    //     tie(block_address, block_id, offset) = memory_disk.retrieve_block_from_record_ptr(record_vector[i]);
-    //     Record* record_ptr = record_vector[i];
-    //     ret = myset.insert(block_id);
-    //     //cout << record_ptr -> numVotes << endl;
-    //     sum_averageRating += record_ptr->averageRating;
-    //     num_records++;
-    // }
+    for (int i = 0; i < record_vector.size(); i++){
+        tie(block_address, block_id, offset) = memory_disk.retrieve_block_from_record_ptr(record_vector[i]);
+        Record* record_ptr = record_vector[i];
+        ret = myset.insert(block_id);
+        //cout << record_ptr -> numVotes << endl;
+        sum_averageRating += record_ptr->averageRating;
+        num_records++;
+    }
 
-    // auto t8 = high_resolution_clock::now();
+    auto t8 = high_resolution_clock::now();
 
-    // auto ms_4 = duration_cast<milliseconds>(t8 - t7);
+    auto ms_4 = duration_cast<milliseconds>(t8 - t7);
 
-    // average_averageRating = (sum_averageRating/num_records);
+    average_averageRating = (sum_averageRating/num_records);
 
-    // cout << "Number of index nodes the process accesses: " << num_index_nodes_accessed << endl;
-    // cout << "Number of data blocks the process accesses: " << myset.size() << endl;
-    // cout << "Average of averageRatings: " << average_averageRating << endl;
-    // cout << "Running time of retrieval process: " << ms_4.count() << "ms\n";
+    cout << "Number of index nodes the process accesses: " << num_index_nodes_accessed << endl;
+    cout << "Number of data blocks the process accesses: " << myset.size() << endl;
+    cout << "Average of averageRatings: " << average_averageRating << endl;
+    cout << "Running time of retrieval process: " << ms_4.count() << "ms\n";
 
-    // auto t9 = high_resolution_clock::now();
-    // num_data_blocks = 0;
+    auto t9 = high_resolution_clock::now();
+    num_data_blocks = 0;
 
-    // for (int i = 0; i < memory_disk.blocks_in_use; i++){
-    //     uint block_id, num_of_elements;
-    //     vector <tuple<uchar*, int>> record_address;
-    //     num_data_blocks++;
-    //     tie(block_id, num_of_elements,record_address) = memory_disk.read_nth_data_block(i);
-    //     for (int j = 0; j < num_of_elements; j++){
-    //         Record* record_ptr = (Record*) (get<0>(record_address[j]) + get<1>(record_address[j]));
-    //         if (record_ptr -> numVotes >= 30000 && record_ptr -> numVotes <= 40000){
-    //             break; // record with numVotes == 500 found
-    //         }
-    //     }
-    // }
+    for (int i = 0; i < memory_disk.blocks_in_use; i++){
+        uint block_id, num_of_elements;
+        vector <tuple<uchar*, int>> record_address;
+        num_data_blocks++;
+        tie(block_id, num_of_elements,record_address) = memory_disk.read_nth_data_block(i);
+        for (int j = 0; j < num_of_elements; j++){
+            Record* record_ptr = (Record*) (get<0>(record_address[j]) + get<1>(record_address[j]));
+            if (record_ptr -> numVotes >= 30000 && record_ptr -> numVotes <= 40000){
+                break; // record with numVotes == 500 found
+            }
+        }
+    }
 
-    // auto t10 = high_resolution_clock::now();
+    auto t10 = high_resolution_clock::now();
 
-    // auto ms_5 = duration_cast<milliseconds>(t10 - t9);
+    auto ms_5 = duration_cast<milliseconds>(t10 - t9);
     
-    // cout << "Number of data blocks accessed by brute-force linear scan: " << num_data_blocks << endl;
-    // cout << "Running time for brute-force linear scan: " << ms_5.count() << "ms\n";
+    cout << "Number of data blocks accessed by brute-force linear scan: " << num_data_blocks << endl;
+    cout << "Running time for brute-force linear scan: " << ms_5.count() << "ms\n";
 
-    BPlusTreeNode* node;
-    bool is_exists;
-
-    tie(node, is_exists) = bptree.search_key(1000);
-    cout << is_exists << endl;
-
-    // bptree.printEntireBPlusTree();
+    cout << "------------------------------Experiment 5 Results-------------------------------------------" << endl;
+    auto t11 = high_resolution_clock::now();
+    
     bptree.remove(1000);
-    bptree.remove(5000);
-    bptree.remove(2000);
-    bptree.remove(100);
-    bptree.remove(500);
-    bptree.remove(1001);
-    bptree.remove(1010);
     
+    auto t12 = high_resolution_clock::now();
 
-    tie(node, is_exists) = bptree.search_key(1000);
-    cout << is_exists << endl;
+    auto ms_6 = duration_cast<milliseconds>(t12 - t11);
 
-    cout << bptree.countNodes(bptree.root) << endl;
-    cout << bptree.countLevels(bptree.root) << endl;
+    cout << "Number of nodes of updated B+ tree: " << bptree.countNodes(bptree.root) << endl;
+    cout << "Number of levels of updated B+ tree: " << bptree.countLevels(bptree.root) << endl;
+    cout << "Content of root node of updated B+ tree: " << endl;
+    bptree.print_root_node();
+    cout << "Running time of removal process: " << ms_6.count() << " ms" << endl;
+
+    auto t13 = high_resolution_clock::now();
+    num_data_blocks = 0;
+
+    for (int i = 0; i < memory_disk.blocks_in_use; i++){
+        uint block_id, num_of_elements;
+        vector <tuple<uchar*, int>> record_address;
+        num_data_blocks++;
+        tie(block_id, num_of_elements,record_address) = memory_disk.read_nth_data_block(i);
+        for (int j = 0; j < num_of_elements; j++){
+            Record* record_ptr = (Record*) (get<0>(record_address[j]) + get<1>(record_address[j]));
+            if (record_ptr -> numVotes >= 30000 && record_ptr -> numVotes <= 40000){
+                break; // record with numVotes == 500 found
+            }
+        }
+    }
+
+    auto t14 = high_resolution_clock::now();
+
+    auto ms_7 = duration_cast<milliseconds>(t14 - t13);
+    
+    cout << "Number of data blocks accessed by brute-force linear scan: " << num_data_blocks << endl;
+    cout << "Running time for brute-force linear scan: " << ms_7.count() << "ms\n";
 
     return 0;
 }

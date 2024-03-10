@@ -521,7 +521,6 @@ void BPlusTree::splitLeafNode(BPlusTreeNode* node, uint key, Record* record) {
     //     cout << newLeafNode->numKeys << endl;
     // }
 
-    cout << newLeafNode->numKeys << endl;
     // for (int i = 0; i < newLeafNode->numKeys; i++){
     //     cout << newLeafNode->numKeys << endl;
     // }
@@ -921,13 +920,6 @@ bool BPlusTree::borrowSiblings(BPlusTreeNode* node) {
     return false;
 }
 
-tuple<BPlusTreeNode*, BPlusTreeNode*>findSiblings(BPlusTreeNode* target_node){
-    
-    // Go to parent of this node and search for the first key of the target node
-    BPlusTreeNode* parentNode = target_node -> parent;
-
-
-}
 
 // Searches for an index of a key within a node
 tuple<int, bool> BPlusTree::search_key_in_node(BPlusTreeNode* target_node, uint key){
@@ -970,7 +962,7 @@ tuple<BPlusTreeNode*, bool> BPlusTree::search_to_delete(uint key){
 // Follow the right ptr, then follow all the first children until the leaf node
 uint BPlusTree::find_smallest_right_subtree(BPlusTreeNode* right_ptr){
 
-    BPlusTreeNode* cursor = root;
+    BPlusTreeNode* cursor = right_ptr;
 
     while(!(cursor->isLeafNode)){
         cursor = cursor -> children[0];

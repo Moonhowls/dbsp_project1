@@ -66,9 +66,6 @@ class BPlusTree {
         // 3. When a deleted key is found in the tree as an index, it is deleted and replaced by the smallest value of its right sub-tree
         uint find_smallest_right_subtree(BPlusTreeNode* right_ptr);
 
-        // 4. Finds the left and right siblings of a target_node, returns nullptr if there isn't any
-        tuple<BPlusTreeNode*, BPlusTreeNode*>findSiblings(BPlusTreeNode* target_node);
-
         // 5. Checks whether the leaf node is balanced, call this after the deletion has been handled
         bool leaf_is_balanced(BPlusTreeNode* leaf_node);
 
