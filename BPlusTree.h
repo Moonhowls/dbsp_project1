@@ -25,9 +25,7 @@ class BPlusTree {
         BPlusTree(int order); // constructor
         ~BPlusTree(); // destructor
 
-        tuple<BPlusTreeNode*,bool> search(uint key); // Function to search for a key in the B+ tree
         void insert(uint key, Record* record); // Function to insert a key and its corresponding record into the B+ tree
-        void print_tree();
         // void remove(int key); // Function to delete a key and its corresponding record from the B+ tree
 
         // Helper functions for insertion
@@ -42,7 +40,6 @@ class BPlusTree {
         tuple<BPlusTreeNode*,bool> searchRecursive(BPlusTreeNode* node, uint key);
         BPlusTreeNode* createLeafNode();
         BPlusTreeNode* createInternalNode();
-        void print_number_of_nodes_and_levels();
         int countNodes(BPlusTreeNode* root);
         void printNodeAndLevelCount(BPlusTreeNode* root);
         int countLevels(BPlusTreeNode* root);

@@ -4,9 +4,9 @@
 
 /**
  * @brief 
- * 
- * @param arr 
- * @param size 
+ * Converts a unsigned integer array to a unsigned integer vector
+ * @param arr array to be converted to vector
+ * @param size size of the array
  * @return std::vector<uint> 
  */
 std::vector<uint> arrayToVector(uint arr[], int size) {
@@ -39,7 +39,7 @@ void vectorToArray(const std::vector<uint>& vec, uint arr[], int size) {
 
 /**
  * @brief 
- * 
+ * Converts a BPlusTreeNode pointer array to a BPlusTreeNode pointer vector
  * @param arr 
  * @param size 
  * @return std::vector<BPlusTreeNode*> 
@@ -51,7 +51,7 @@ std::vector<BPlusTreeNode*> ptrarrayToVector(BPlusTreeNode* arr[], int size) {
 
 /**
  * @brief 
- * 
+ * Converts a BPlusTreeNode pointer vector to a BPlusTreeNode pointer array
  * @param vec 
  * @param arr 
  * @param size 
@@ -113,15 +113,6 @@ void BPlusTree::destroyTree(BPlusTreeNode* node) {
 // BPlusTreeNode* : a node pointer if a target is found
 // bool: whether the key is a duplicate
 
-/**
- * @brief Searches the BPlusTree to return to us a pointer to the node (if found), and a bool indicating if the searched for key has duplicates
- * 
- * @param key : the key we're searching the tree for
- * @return tuple<BPlusTreeNode*, bool> 
- */
-tuple<BPlusTreeNode*, bool> BPlusTree::search(uint key) {
-    return searchRecursive(root, key);
-}
 
 /**
  * @brief 
@@ -969,36 +960,6 @@ bool BPlusTree::internal_is_balanced(BPlusTreeNode* internal_node){
 
 }
 
-void BPlusTree::print_tree(){
-
-    BPlusTreeNode* first_leaf_node;
-    bool is_duplicate;
-
-    tie(first_leaf_node, is_duplicate) = search_key(0);
-
-    cout << "Here1" << endl;
-
-    BPlusTreeNode* target_node = first_leaf_node;
-
-    cout << "Here2" << endl;
-
-    int ptr_array_size = sizeof(target_node -> children)/sizeof(target_node -> children[0]);
-
-    cout << "Here3" << endl;
-
-    int node_counter = 1;
-
-    while(target_node -> children[ptr_array_size - 1] != nullptr){
-        cout << "Leaf Node " << node_counter << endl << endl;
-        for (int i = 0; i < target_node -> numKeys ; i++){
-            cout << target_node -> keys[i] << endl;
-        }
-        target_node = target_node -> children[ptr_array_size - 1];
-        node_counter++;
-    }
-
-}
-
 /**
  * @brief Main function for printing the BPlus Tree
  * 
@@ -1108,21 +1069,3 @@ int BPlusTree::countLevels(BPlusTreeNode* root) {
 
     return num_levels;
 }
-
-void BPlusTree::print_number_of_nodes_and_levels(){
-
-    BPlusTreeNode* cursor = root;
-    int number_of_nodes = 1;
-    int number_of_levels = 1;
-
-    for (int i = 0; i < cursor -> numKeys + 1; i++){
-        if (cursor -> isLeafNode){
-
-        }
-        else{
-            number_of_levels++;
-        }
-
-    }
-
-};
