@@ -10,9 +10,7 @@ struct BPlusTreeNode {
     int numKeys; // number of keys stored in the node
     uint keys[23] = {0};
     BPlusTreeNode* children[24] = {nullptr};
-    //vector<int> keys; // keys stored in this node
     vector<vector<Record*>> recordLists; // list of records associated with each key (for leaf nodes only) (needed for duplicate handling)
-    //vector<BPlusTreeNode*> children; // Pointers to children nodes (for internal nodes only)
     BPlusTreeNode* parent; // Pointer to parent node
 };
 
@@ -32,8 +30,7 @@ class BPlusTree {
         void print_tree();
         // void remove(int key); // Function to delete a key and its corresponding record from the B+ tree
 
-        // Helper functions for insertion and deletion
-        // void mergeNodes(BPlusTreeNode* left, BPlusTreeNode* right);
+        // Helper functions for insertion
         void insertRecursive(BPlusTreeNode* node, uint key, Record* record);
         void insertIntoLeaf(BPlusTreeNode* node, uint key, Record* record);
         void insertIntoParent(BPlusTreeNode* left, uint key, BPlusTreeNode* right);
@@ -49,7 +46,6 @@ class BPlusTree {
         int countNodes(BPlusTreeNode* root);
         void printNodeAndLevelCount(BPlusTreeNode* root);
         int countLevels(BPlusTreeNode* root);
-        // void removeRecursive(BPlusTreeNode* node, int key);
         void printBPlusTree(BPlusTreeNode* treeRoot);
         void destroyTree(BPlusTreeNode* node);
         void print_root_node();
