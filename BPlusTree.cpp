@@ -875,9 +875,8 @@ bool BPlusTree::borrowSiblings(BPlusTreeNode* node) {
             // update node numKeys
             node -> numKeys++;
             
-            // does anything have to be done for the parent?
-            // Should update parent
-
+            // update parent to be new first key of current node
+            parent -> keys[nodeIndex - 1] = node -> keys[0];
             
             //
             return true;
@@ -910,7 +909,8 @@ bool BPlusTree::borrowSiblings(BPlusTreeNode* node) {
             // update node numKeys
             node -> numKeys++;
             
-            // does anything have to be done for the parent?
+            // update parent to be new first key of right sibling
+            parent -> keys[nodeIndex] = rightSibling -> keys[0];
             
             //
             return true;
