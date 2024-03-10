@@ -206,7 +206,7 @@ int main(){
     auto ms_3 = duration_cast<milliseconds>(t6 - t5);
 
     std::cout << "Number of data blocks accessed by brute-force linear scan: " << num_data_blocks << endl;
-    std::cout << "Running time for brute-force linear scan: " << ms_3.count() << "ms\n";
+    std::cout << "Running time for brute-force linear scan: " << duration<double>(ms_3).count() << "ms\n";
 
 
     cout << "---------------------------------------------------------------------------------------------" << endl;
@@ -244,7 +244,7 @@ int main(){
     cout << "Number of index nodes the process accesses: " << num_index_nodes_accessed << endl;
     cout << "Number of data blocks the process accesses: " << myset.size() << endl;
     cout << "Average of averageRatings: " << average_averageRating << endl;
-    cout << "Running time of retrieval process: " << ms_4.count() << "ms\n";
+    cout << "Running time of retrieval process: " << duration<double>(ms_4).count() << "ms\n";
 
     auto t9 = high_resolution_clock::now();
     num_data_blocks = 0;
@@ -267,7 +267,7 @@ int main(){
     auto ms_5 = duration_cast<milliseconds>(t10 - t9);
     
     cout << "Number of data blocks accessed by brute-force linear scan: " << num_data_blocks << endl;
-    cout << "Running time for brute-force linear scan: " << ms_5.count() << "ms\n";
+    cout << "Running time for brute-force linear scan: " << duration<double>(ms_5).count() << "ms\n";
 
     cout << "------------------------------Experiment 5 Results-------------------------------------------" << endl;
     auto t11 = high_resolution_clock::now();
@@ -282,7 +282,7 @@ int main(){
     cout << "Number of levels of updated B+ tree: " << bptree.countLevels(bptree.root) << endl;
     cout << "Content of root node of updated B+ tree: " << endl;
     bptree.print_root_node();
-    cout << "Running time of removal process: " << ms_6.count() << " ms" << endl;
+    cout << "Running time of removal process: " << duration<double>(ms_6).count() << " ms" << endl;
 
     auto t13 = high_resolution_clock::now();
     num_data_blocks = 0;
@@ -305,7 +305,7 @@ int main(){
     auto ms_7 = duration_cast<milliseconds>(t14 - t13);
     
     cout << "Number of data blocks accessed by brute-force linear scan: " << num_data_blocks << endl;
-    cout << "Running time for brute-force linear scan: " << ms_7.count() << "ms\n";
+    cout << "Running time for brute-force linear scan: " << duration<double>(ms_7).count() << "ms\n";
 
     return 0;
 }
